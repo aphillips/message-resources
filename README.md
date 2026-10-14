@@ -119,8 +119,10 @@ However, the Gettext format also has some issues in this context:
 - The built-in support for plural variance depends on
   inlining a snippet of C code that defines an integer `plural` value,
   rather than depending on the locale-specific CLDR plural keys that are now available.
-- The built-in support for plural variance effectively expects for the source language to
-  always be English, or at the very least a language
+- The source side of a plural entry is limited to a `msgid` and a `msgid_plural`,
+  reflecting a singular/plural distinction.
+  This does not work well for source languages whose plural distinctions
+  cannot be naturally represented by those two forms.
 - The syntax used within a message needs to be separately defined for each message.
 - Representing multi-line messages requires wrapping each line separately with `"`...`\n"`.
 - The format has evolved and [is evolving][po-evolution] as a part of the Gettext localization system
