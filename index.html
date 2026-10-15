@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <title>Message Resources</title>
 
+  <!-- local styles. Includes the styles from https://www.w3.org/International/i18n-activity/guidelines/editing -->
+  <link rel="stylesheet" href="local.css" type="text/css">
+  
   <script
     src="https://www.w3.org/Tools/respec/respec-w3c"
     class="remove"
@@ -13,10 +16,9 @@
     var respecConfig = {
       specStatus: "ED",
       editors: [
-        {
-          name: "Your Name",
-          url: "https://example.com/"
-        }
+        { name: "Eemeli Aro", mailto: "eemeli@mozilla.com", company: "Mozilla Foundation" },
+        { name: "Addison Phillips", mailto: "addisonI18N@gmail.com", company: "Invited Expert", w3cid: 33573 }
+			
       ],
       shortName: "message-resources",
       github: "w3c/message-resources",
@@ -28,16 +30,156 @@
 </head>
 <body>
   <section id="abstract">
-    <p>This document defines a small example specification.</p>
+    <p>This specification defines a standard container for localizable content,
+       especially <a>messages</a> that support <a>Unicode MessageFormat</a> [[CLDR]].</p>
   </section>
 
   <section id="sotd"></section>
 
   <section>
     <h2>Introduction</h2>
-    <p>This is where the document begins.</p>
+    <p>This specification defines a container for <a>messages</a>,
+    including a data model, file-based serialization, and basic processing.</p>
+    
+    <p>Message resources allow application and document format authors to separate strings and other content
+    that might need <a>localization</a> from the logic and presentational structure of Web content.
+    This includes (but is not limited to) HTML pages, scripts, manifests, or other documents.
+    This allows for the creation, translation, or adaptation to new languages or <a>locales</a> without affecting
+    the core functionality and fascilitates management of presentation to audiences that vary by language or culture.</p>
   </section>
 
   <section id="conformance"></section>
+  
+  <section id="conventions">
+	  <h3>Document Conventions</h3>
+	
+        <p>In this document [[RFC2119]] keywords in uppercase italics have their usual meaning. We also use these stylistic conventions:</p>
+
+        <p class="definition-example"><strong>Definitions</strong> appear with a different background color and decoration like this.</p>
+        <p class="advisement"><strong>Best practices</strong> appear with a different background color and decoration like this.</p>
+        <p class="issue-example" id="issue-example"><strong>Issues</strong>, gaps, and recommendations for future work appear with a different background color and decoration like this.</p>
+
+  </section>
+      
+      <section id="terminology">
+        <h3>Terminology</h3>
+        <p>This section contains terminology specific to this document.</p>
+        
+        <p>Much of the terminology needed to understand this document is provided by the <cite>Internationalization Glossary</cite> [[I18N-GLOSSARY]]</p>
+        
+        <p class="definition"><dfn>Message</dfn>. In this document's context, a "message" refers to a specific <a>message format</a> pattern string,
+        including additional data or metadata relating to the message's handling or localization.</p>
+        
+        <aside class="note">
+			<p>A <a>message format</a> pattern string can be a plain string that requires no formatting at all,
+			including the empty string.</p>
+        </aside>
+        
+        <p class="definition"><dfn data-lt="Unicode MessageFormat|MF2|MessageFormat|message format">Unicode MessageFormat</dfn> ("MF2") is
+        a Unicode Consortium standard defined as part of [[UTS35]] that defines the data model, syntax, processing, and conformance requirements 
+        for the next generation of dynamic messages.</p>
+        
+        </section>
+      </section>
+      
+      
+      <section id="ABNF">
+		  <h3>Syntax</h3>
+		  
+		  <p>The syntax of a message resource is described by the following [[ABNF]]:</p>
+		  
+		  <pre class="abnf">
+; A resource consists of any number of
+; section headers, entries, comments and empty lines.
+; These are all separated from each other by LF or CRLF line endings.
+; Except for empty lines, all lines start with a non-whitespace character.
+resource = line *(newline line)
+line = frontmatter / section-head / entry / metadata / comment / empty-line
+
+; Comments and metadata before the frontmatter attach to the entire resource.
+; A valid resource must have at most one frontmatter,
+; and it must not have any section-head or entry lines before the frontmatter.
+frontmatter = "---" [ws]
+
+; As in TOML, entries after a section-head belong to the section.
+; Sections do not nest under preceding sections,
+; but must always define their full id path.
+section-head = "[" [ws] id [ws] "]" [ws]
+entry = id [ws] "=" [ws] value
+
+; Metadata attaches properties to the subsequent frontmatter, section-head or entry.
+; Other metadata lines are valid between metadata and its target,
+; but comments and empty lines are not.
+; As with entries, the value of metadata may span multiple lines,
+; provided that each beyond the first is indented by some whitespace.
+metadata = "@" id-part [ws value]
+
+; Adjacent comments should be considered as a single multi-line comment.
+; Comments attach to a subsequent frontmatter, section-head or entry,
+; if not separated from it by any empty lines.
+; Metadata lines are valid between comments and their target.
+comment = "#" *(content / backslash)
+empty-line = [ws]
+
+ws = 1*(SP / HTAB)
+newline = CRLF / LF
+
+; An identifier is made up of one or more non-empty parts separated by dots.
+; Common symbols and non-printable characters must be \escaped in identifiers.
+; To avoid conflicts with frontmatter,
+; an id starting with `---` must `\-` escape at least one of those characters.
+id = id-start *([ws] "." [ws] id-part)
+id-start = (["-"] ["-"] id-char [id-part]) / ("-" ["-"])
+id-part = 1*(id-char / "-")
+id-char = id-safe / id-escape
+id-safe = ALPHA / DIGIT / "_"
+        / %x00A1-1FFF / %x200C-200D / %x2030-205E / %x2070-2FEF
+        / %x3001-D7FF / %xF900-FDCF / %xFDF0-FFFD / %x10000-EFFFF
+id-escape = backslash (escaped / symbols)
+symbols = %x21-2F / %x3A-40 / %x5B-60 / %x7B-7E ; ASCII symbols and punctuation
+        / %xA1-BF / %xD7 / %xF7 ; Latin-1 symbols and punctuation
+        / %x2010-2027 / %x2030-205E / %x2190-2BFF ; General symbols and punctuation
+
+; Values must be parsed as MF2 messages.
+; A message may be defined on multiple lines,
+; as long as each line after the first is indented by at least one space or is empty.
+; If a message body line starts with significant whitespace,
+; its first character must be \escaped.
+; When a newline occurs in a value,
+; it is always considered to represent a single U+000A LF character.
+; To include a U+000D CR character in a value, it must be \r escaped.
+; In the resolved value of a message, leading and trailing whitespace is trimmed from each line,
+; and empty lines are trimmed from the beginning and end of the message.
+; To retain any whitespace, they must be \escaped.
+value = value-line *(1*newline ws value-line)
+value-line = [(value-start / value-escape) *(content / value-escape)]
+; A resource must not contain any control characters or vertical whitespace
+; which might be mistaken for newlines.
+value-start = %x21-5B ; omit C0 controls, SP, and \
+            / %x5D-7E ; omit C1 controls
+            / %x00A0-2027 ; omit LSEP & PSEP
+            / %x202A-D7FF ; omit surrogates
+            / %xE000-10FFFF
+content = SP / HTAB / value-start
+; Each of the escape sequences recognised by MF2 \\, \{, \|, \}
+; pass through resource parsing as complete and intact,
+; so that they do not need to be double-escaped.
+value-escape = backslash (escaped / "{" / "|" / "}")
+
+; The bulk of valid escapes is shared between id-escape and value-escape.
+; If a newline is \ escaped, it (and the subsequent whitespace indentation) is ignored.
+; This allows for long keys and values to be wrapped for legibility.
+; As an example, each of the these is a valid representation of a horizontal tab:
+; \	, \t, \x09, \u0009, \U000009
+escaped = backslash
+        / (newline ws)
+        / SP / HTAB
+        / %s"n" / %s"r" / %s"t" ; represent LF, CR, HTAB
+        / (%s"x" HEXDIG HEXDIG)
+        / (%s"u" HEXDIG HEXDIG HEXDIG HEXDIG)
+        / (%s"U" HEXDIG HEXDIG HEXDIG HEXDIG HEXDIG HEXDIG)
+backslash = "\"
+		  </pre>
+      </section>
 </body>
 </html>

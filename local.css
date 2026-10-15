@@ -1,0 +1,155 @@
+.unicode {
+	font-style: normal
+}
+
+.unicode:link {
+	color: #FF0000;
+	background-color: #FFFFFF;
+}
+
+.unicode:visited {
+	color: #808080;
+	background-color: #FFFFFF;
+}
+
+.unicode:active {
+	color: #0000FF;
+	background-color: #FFFFFF;
+}
+
+em.unicode {
+	font-style: normal;
+}
+
+ins {
+	background-color: #FF6;
+}
+
+p.cjk-demo {
+	font-size: 200%; 
+	text-align: center;
+	font-family: serif;
+}
+
+
+
+
+
+.advisement + .links { margin-top: -1em; }
+.advisement + .links a { text-decoration: none; border-bottom: none; }
+.advisement { }
+.req { position: relative; }
+.req .links { padding-bottom: 0; }
+.req .self-link {
+	margin-left: -1em;
+	float: left;
+	text-decoration: none;
+	border: 0;
+	font-size: 80%;
+	color: #999;
+	}
+
+
+
+
+.reqex {
+    background-color: #FFC;
+    font-style: italic;
+}
+
+.reqex::before {
+    content: "\1f44d \00A0 Req. #: ";
+    font-style: normal;
+    color: #63F;;
+}
+
+kbd {
+   font-family: Menlo, Consolas, "DejaVu Sans Mono", Monaco, monospace;
+   font-size: .95em;
+   color: blue;
+   break-inside: avoid;
+   hyphens: none;
+   text-transform: none;
+   text-align: left;
+   text-align: start;
+}
+
+
+.summary {
+    padding: 1em;
+    background-color: antiquewhite;
+}
+
+a.self {
+    position: absolute;
+    top: -20px;
+    border: medium none;
+    transition: opacity 0.2s ease 0s;
+    opacity: 0.5;
+	color: #999;
+	text-decoration: none;
+	display: inline;
+}
+
+a.self:visited {
+	color: #999;
+}
+
+a.self:hover {
+	color: red;
+}
+
+.self::after {
+	content:  attr(href); 	
+	font-weight: normal;
+	font-style: italic;
+	font-size: 80%;
+}
+
+.advisement {
+    position: relative;
+}
+
+.definition {
+    position: relative;
+    background-color: #efefef;
+    padding: 0.5em;
+    border: 0.5em;
+    border-left: 6pt solid green;
+    border-right: 6pt solid green;
+    margin: 1em auto;
+}
+
+.definition-example {
+    /* Used to style the example of a definition so that
+     * it doesn't participate in linking, etc.
+     */
+    position: relative;
+    background-color: #efefef;
+    padding: 0.5em;
+    border: 0.5em;
+    border-left: 6pt solid green;
+    border-right: 6pt solid green;
+    margin: 1em auto;
+}
+
+.issue-example {
+    /* Used to style the example of an issue so that
+     * it doesn't participate in linking, or auto-increment
+     * the counter
+     */
+    position: relative;
+    background: #FBE9E9;
+    padding: 0.5em;
+    border: 0.5em;
+    border-left: 6pt solid #E05252;
+    border-right: 6pt solid #E05252;
+    margin: 1em auto;
+}
+
+.uname {
+   font-size: 75%;
+   letter-spacing: 0.05em;
+   text-transform: uppercase;
+   margin: 0 2px;
+}
